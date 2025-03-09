@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+#root {
+  margin: 0 auto;
+  padding: 2rem;
+  height: 100vh
+  /* text-align: center; */ /* 👈 Elimina o comenta esta línea */
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Asegura que el contenido esté centrado horizontalmente */
+  justify-content: flex-start; /* 👈 Esto mueve el contenido arriba */
+}
