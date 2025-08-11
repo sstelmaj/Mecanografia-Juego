@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
-import palabrasComunes from "./modelo/palabras.js"; 
+import { useState, useEffect, useRef } from "react";
+import palabrasComunes from "./modelo/palabras.js";
 
 const misPalabrasComunes = palabrasComunes;
 
-// generacion de texto
 const generarTexto = (listaPalabras, count) => {
   const shuffled = [...listaPalabras].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count).join(" ");
@@ -12,49 +11,57 @@ const generarTexto = (listaPalabras, count) => {
 export default function TypingGame() {
   const [texto, setTexto] = useState("");
   const [input, setInput] = useState("");
+  const [inputPantalla, setInputPantalla] = useState("");
   const [startTime, setStartTime] = useState(null);
   const [errors, setErrors] = useState(0);
   const [wpm, setWpm] = useState(0);
-  const [inputPantalla, setInputPantalla] = useState("");
   const [gameFinished, setGameFinished] = useState(false);
+  const inputRef = useRef(null);
 
-
-  // Inicio el juego reiniciando valores
-  const empezarJuego = (listaPalabras) => {
-    setTexto(generarTexto(listaPalabras, 30) + " ");  
-    setInput("");  
-    setStartTime(null);  
-    setErrors(0);  
-    setWpm(0);  
+  const empezarJuego = () => {
+    if (inputRef.current) inputRef.current.focus();
+    setTexto(generarTexto(misPalabrasComunes, 30) + " ");
+    setInput("");
+    setInputPantalla("");
+    setStartTime(null);
+    setErrors(0);
+    setWpm(0);
+    setGameFinished(false);
   };
 
   useEffect(() => {
-    const textoPalabras = texto.trim().split(" ");
-    const inputPalabras = input.trim().split(" ");
-    if (inputPalabras.length === 1 && !startTime) {
+    if (!startTime && (inputPantalla.length > 0 || input.length > 0)) {
       setStartTime(Date.now());
     }
-    if (input.length > 0 && textoPalabras.length === inputPalabras.length) {
-      console.log("termino el juego");
-      calcularErrores(input);
-      setGameFinished(true); // Marcar el juego como terminado
+
+    const textoPalabras = texto.trim().split(" ");
+    const inputPalabras = (input + inputPantalla).trim().split(" ");
+
+    if (inputPalabras.length === textoPalabras.length && 
+        inputPantalla.trim() === "" && 
+        !gameFinished) {
+      calcularErrores(input.trim());
+      setGameFinished(true);
     }
-  }, [input]);
+  }, [input, inputPantalla]);
+
 
   useEffect(() => {
-    if (gameFinished) {
-      console.log("haciendo calculo WPM");
-      calculateWPM();  // Calcular WPM solo cuando el juego termina
+    if (startTime && !gameFinished) {
+      const intervalo = setInterval(calculateWPM, 500);
+      return () => clearInterval(intervalo);
     }
-  }, [gameFinished]);
+    if (gameFinished) {
+      calculateWPM();
+    }
+  }, [startTime, gameFinished]);
 
   const handleChange = (e) => {
     const value = e.target.value;
 
-    if (value.includes(" ")) {
-      setInput(input + value);
+    if (value.endsWith(" ")) {
+      setInput(input + value.trim() + " ");
       setInputPantalla("");
-      //errorPalabra(value);
     } else {
       setInputPantalla(value);
     }
@@ -70,35 +77,67 @@ export default function TypingGame() {
         errorCount++;
       }
     }
-
-    errorCount += Math.max(0, textoPalabras.length - inputPalabras.length);
-
     setErrors(errorCount);
   };
 
   const calculateWPM = () => {
     if (startTime) {
       const elapsedMinutes = (Date.now() - startTime) / 60000;
-      const wordsTyped = texto.split(" ").length;
-
+      const wordsTyped = (input.trim().split(" ").length) || 1;
       const wpmCalculated = Math.round((wordsTyped - errors) / elapsedMinutes);
-      console.log(wpmCalculated);
-      console.log(wordsTyped);
-      console.log(errors);
-      setWpm(wpmCalculated);
+      setWpm(wpmCalculated > 0 ? wpmCalculated : 0);
     }
   };
 
   const getHighlightedText = () => {
-    return texto.split(" ").map((word, index) => {
-      const userWord = input.split(" ")[index] || "";
-      const isCorrect = userWord === word;
-      const colorClass = isCorrect ? "text-green-500" : (userWord && userWord !== word ? "text-red-500" : "");
-      return (
-        <span key={index} className={`${colorClass} mr-2`}>
-          {word} 
-        </span>
-      );
+    const allInput = (input + inputPantalla).trim().split(" ");
+    const textoPalabras = texto.split(" ");
+
+    return textoPalabras.map((word, index) => {
+      const userWord = allInput[index] || "";
+      let colorClass = "";
+
+      if (index < allInput.length - (inputPantalla ? 1 : 0)) {
+        colorClass = userWord === word ? "text-green-500" : "text-red-500";
+        return (
+          <>
+            <span key={index} className={colorClass}>
+              {word}
+            </span>{" "}
+          </>
+        );
+      } 
+
+      else if (index === allInput.length - (inputPantalla ? 1 : 0) && inputPantalla) {
+        return (
+          <>
+            <span key={index}>
+              {word.split("").map((char, charIndex) => {
+                const userChar = inputPantalla[charIndex];
+                let charColor = "";
+                if (userChar !== undefined) {
+                  charColor = userChar === char ? "text-green-500" : "text-red-500";
+                }
+                return (
+                  <span key={charIndex} className={charColor}>
+                    {char}
+                  </span>
+                );
+              })}
+            </span>{" "}
+          </>
+        );
+      } 
+      // esto es la palabra actual que todavia no tiene entrada
+      else {
+        return (
+          <>
+            <span key={index}>
+              {word}
+            </span>{" "}
+          </>
+        );
+      }
     });
   };
 
@@ -107,22 +146,27 @@ export default function TypingGame() {
       <div className="container">
         <h1 className="text-2xl font-bold mb-4">Juego de Mecanografía</h1>
       </div>
+      <div>
+        <img src="/iconoMecanografia.jpg" alt="icono juego" className="w-24 h-24 rounded-full shadow-md bg-gray-100 mx-auto mb-6 transition-all duration-300 hover:scale-105 fixed top-10 left-10" />
+      </div>
       <div className="flex flex-col justify-center align-middle items-center p-4 h-full max-h-full mx-auto">
-        <div className="mb-2 border-b pb-2">
+        <div className="mb-2 border-b pb-2 w-full max-w-lg mx-auto whitespace-pre-wrap break-normal leading-relaxed text-justify">
           {getHighlightedText()}
         </div>
 
         <input
+          ref={inputRef} 
           type="text"
           value={inputPantalla}
           onChange={handleChange}
+          disabled={gameFinished}
           className="border p-2 w-full max-w-lg"
           placeholder="Escribe aquí..."
         />
 
         <p className="mt-4">Errores: {errors}</p>
         <p>Velocidad: {wpm} WPM</p>
-        <button onClick={() => empezarJuego(misPalabrasComunes)}>
+        <button onClick={empezarJuego} className="mt-4 p-2 border rounded">
           Empezar
         </button>
       </div>
