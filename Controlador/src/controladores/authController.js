@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Usuario = require('../modelos/usuario');
 
@@ -10,8 +9,8 @@ async function registrarUsuario(req, res) {
 
     try {
         let hashedPassword = await bcrypt.hash(req.body.password, 10);
+        req.body.password = hashedPassword;
         const nuevoUsuario = new Usuario(req.body);
-        nuevoUsuario.password = hashedPassword;
         await nuevoUsuario.save();
         res.status(201).send({ message: 'Usuario registrado exitosamente', usuario: {username: nuevoUsuario.username, email: nuevoUsuario.email} });
     }
@@ -21,18 +20,34 @@ async function registrarUsuario(req, res) {
         }
         res.status(500).send(err.message);
     }
-}  //////// ME QUEDE ACA
+}  
 
-function loginUsuario(req, res) {
-    const Usuario = mongoose.model('Usuario');
-    Usuario.findOne({ email: req.body.email })
-        .then(usuario => {
-            if (!usuario || !bcrypt.compareSync(req.body.password, usuario.password)) {
-                return res.status(401).send({ message: 'Credenciales inválidas' });
+async function loginUsuario(req, res) {
+    try {
+
+        if (!req.body.email || !req.body.password) {
+            return res.status(400).send({ message: 'Faltan campos obligatorios' });
+        }
+
+        const usuario = await Usuario.findOne({ email: req.body.email })
+        if (!usuario || !(await bcrypt.compare(req.body.password, usuario.password))) {
+            return res.status(401).send({ message: 'Credenciales inválidas' });
+        }
+        res.send({ 
+            message: 'Login exitoso', 
+            usuario: {
+                username: usuario.username, 
+                email: usuario.email 
             }
-            res.send({ message: 'Login exitoso', usuario });
-        })
-        .catch(err => res.status(500).send(err));
+        });
+    }
+        
+    catch (err){
+        if (err.name === 'CastError') {
+             return res.status(400).send({ message: 'Email inválido' }); 
+        }
+        res.status(500).send(err.message);
+    };
 }
 
 module.exports = { registrarUsuario, loginUsuario };
