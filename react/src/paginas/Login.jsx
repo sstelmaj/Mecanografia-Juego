@@ -1,11 +1,28 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { data, useNavigate, useLocation } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate();
+  const navigate = useNavigate();  
+  const location = useLocation();
+
+  useEffect(() => { 
+    if (location.state?.message && !message) {
+     setMessage(location.state.message); 
+    } 
+  }, [location]);
+
+  useEffect(() => { 
+    if (message && message !== "Error en el login" && message !== "Error de conexión. Verifica la consola para más detalles." && message !== "Credenciales inválidas") { 
+      document.getElementById("login-message")?.classList.add("text-green-700");
+      document.getElementById("login-message")?.classList.remove("text-red-800"); 
+    } else {
+      document.getElementById("login-message")?.classList.add("text-red-800");
+      document.getElementById("login-message")?.classList.remove("text-green-700"); 
+    }
+  }, [message]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +40,8 @@ export default function Login() {
 
       if (response.ok) {
         setMessage(data.message || "Login exitoso");
+        localStorage.setItem("username", data.usuario.username);
+        localStorage.setItem("email", data.usuario.email);
         navigate("/");
       } else {
         setMessage(data.message || "Error en el login");
@@ -87,7 +106,7 @@ export default function Login() {
             </label>
           </div>
 
-          {message && <p className="text-center text-red-800">{message}</p>}
+          {message && <p id="login-message" className="text-center text-red-800">{message}</p>}
 
           <button
             type="submit"

@@ -7,8 +7,6 @@ usuarioSchema = new mongoose.Schema({
 })
 
 mongoose.model('Usuario', usuarioSchema)
+const usuario = mongoose.model('Usuario')
 
-module.exports = mongoose.model('Usuario')
-
-
-
+module.exports = usuario

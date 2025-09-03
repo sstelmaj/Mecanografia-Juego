@@ -18,6 +18,24 @@ export default function TypingGame() {
   const [gameFinished, setGameFinished] = useState(false);
   const inputRef = useRef(null);
 
+  //datos del usuario
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      if (localStorage.getItem("username")) {
+        const storedUsername = localStorage.getItem("username");
+        const storedEmail = localStorage.getItem("email");
+        setIsAuthenticated(true);
+        setUsername(storedUsername || "Usuario no reconocido");
+        setEmail(storedEmail || "Email no reconocido");
+      }
+    }
+  }, []);
+
   const empezarJuego = () => {
     if (inputRef.current) inputRef.current.focus();
     setTexto(generarTexto(misPalabrasComunes, 30) + " ");
@@ -141,6 +159,18 @@ export default function TypingGame() {
     });
   };
 
+  const [showModal, setShowModal] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    setIsAuthenticated(false);
+    setUsername("");
+    setEmail("");
+    setShowModal(false);
+    window.location.href = "/Login";
+  };
+
   return (
     <main className="h-full max-h-full">
       <div className="container">
@@ -149,13 +179,55 @@ export default function TypingGame() {
       <div>
         <img src="/iconoMecanografia.jpg" alt="icono juego" className="w-24 h-24 rounded-full shadow-md bg-gray-100 mx-auto mb-6 transition-all duration-300 hover:scale-105 fixed top-10 left-10" />
       </div>
-      {/* Botón de iniciar sesión fijo arriba a la derecha */}
-      <button
-        className="fixed top-10 right-10 bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition"
-        onClick={() => window.location.href = "/Login"}
-      >
-        Iniciar Sesión
-      </button>
+      {isAuthenticated ? (
+        <div className="fixed top-10 right-10 bg-gray-200 text-gray-800 px-4 py-2 rounded shadow flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6 text-gray-600"
+            fill="none"
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2" fill="none" />
+            <path
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              d="M4 20c0-4 4-6 8-6s8 2 8 6"
+            />
+          </svg>
+          <span
+            className="cursor-pointer hover:underline"
+            onClick={() => setShowModal((prev) => !prev)}
+          >
+            {username}
+          </span>
+          {showModal && (
+            <div className="absolute top-full right-0 mt-2 bg-white rounded shadow-lg p-4 min-w-[200px] z-50">
+              <h2 className="text-lg font-bold mb-3">{username}</h2>
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition w-full mb-2"
+                onClick={handleLogout}
+              >
+                Cerrar sesión
+              </button>
+              <button
+                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition w-full"
+                onClick={() => setShowModal(false)}
+              >
+                Cerrar
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <button
+          className="fixed top-10 right-10 bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 transition"
+          onClick={() => window.location.href = "/Login"}
+        >
+          Iniciar Sesión
+        </button>
+      )}
       <div className="flex flex-col justify-center align-middle items-center p-4 h-full max-h-full mx-auto">
         <div className="mb-2 border-b pb-2 w-full max-w-lg mx-auto whitespace-pre-wrap break-normal leading-relaxed text-justify">
           {getHighlightedText()}

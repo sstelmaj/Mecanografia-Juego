@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const Usuario = require('../modelos/usuario');
 
 async function registrarUsuario(req, res) {
@@ -18,7 +19,7 @@ async function registrarUsuario(req, res) {
         if (err.name === 'MongoError' && err.code === 11000) {
             return res.status(400).send({ message: 'El email ya está en uso' });
         }
-        res.status(500).send(err.message);
+        res.status(500).send({ message: 'Error interno del servidor' });
     }
 }  
 
@@ -33,8 +34,11 @@ async function loginUsuario(req, res) {
         if (!usuario || !(await bcrypt.compare(req.body.password, usuario.password))) {
             return res.status(401).send({ message: 'Credenciales inválidas' });
         }
+        const token = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        console.log("Token generado:", token);
         res.send({ 
-            message: 'Login exitoso', 
+            message: 'Login exitoso',
+            token, 
             usuario: {
                 username: usuario.username, 
                 email: usuario.email 
@@ -46,7 +50,7 @@ async function loginUsuario(req, res) {
         if (err.name === 'CastError') {
              return res.status(400).send({ message: 'Email inválido' }); 
         }
-        res.status(500).send(err.message);
+        res.status(500).send({ message: 'Error interno del servidor' });
     };
 }
 

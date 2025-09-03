@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,7 +22,7 @@ export default function Register() {
       const response = await fetch("http://localhost:4000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ username, email, password }),
       });
 
       const data = await response.json();
@@ -30,7 +30,7 @@ export default function Register() {
 
       if (response.ok) {
         setMessage(data.message || "Registro exitoso");
-        navigate("/login");
+        navigate("/login", { state: { message: data.message || "Registro exitoso" } });
       } else {
         setMessage(data.message || "Error en el registro");
       }
@@ -57,16 +57,16 @@ export default function Register() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label
-            htmlFor="name"
+            htmlFor="username"
             className="block text-sm font-medium text-black mb-1"
           >
             Nombre de usuario
           </label>
           <input
             type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             placeholder="Juan Pérez"
             className="w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-2 focus:outline-none text-black focus:ring-[rgba(72,86,82,1)]"
             required
