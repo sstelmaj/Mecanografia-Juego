@@ -42,6 +42,7 @@ export default function Login() {
         setMessage(data.message || "Login exitoso");
         localStorage.setItem("username", data.usuario.username);
         localStorage.setItem("email", data.usuario.email);
+        localStorage.setItem("token", data.token);
         navigate("/");
       } else {
         setMessage(data.message || "Error en el login");

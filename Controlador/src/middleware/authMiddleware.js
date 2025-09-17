@@ -17,7 +17,6 @@ async function authenticateToken(req, res, next) {
     }
 
     try {
-
         console.log('Verificando token:', token);
         const usuario = await jwt.verify(token, process.env.JWT_SECRET);
         console.log("Usuario decodificado:", usuario);

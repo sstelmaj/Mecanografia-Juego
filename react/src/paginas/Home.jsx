@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import palabrasComunes from "../modelo/palabras";
+//import { set } from "mongoose";
+//import { set } from "mongoose";
 
 const misPalabrasComunes = palabrasComunes;
 
@@ -23,6 +25,32 @@ export default function TypingGame() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
 
+  const enviarResultado = async (wpm, errorCount) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Debes iniciar sesión para guardar tus resultados');
+      return;
+    }
+    const payload = { wpm, errorCount };
+    const bodyString = JSON.stringify(payload);
+    try {
+      const response = await fetch('http://localhost:4000/api/auth/results', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: bodyString,
+      });
+      const data = await response.json();
+      if (response.status !== 201) {
+        alert('Error: ' + data.message);
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error);
+      alert('Error al guardar el resultado');
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -39,12 +67,12 @@ export default function TypingGame() {
   const empezarJuego = () => {
     if (inputRef.current) inputRef.current.focus();
     setTexto(generarTexto(misPalabrasComunes, 30) + " ");
+    setGameFinished(false);
     setInput("");
     setInputPantalla("");
     setStartTime(null);
     setErrors(0);
     setWpm(0);
-    setGameFinished(false);
   };
 
   useEffect(() => {
@@ -58,21 +86,17 @@ export default function TypingGame() {
     if (inputPalabras.length === textoPalabras.length && 
         inputPantalla.trim() === "" && 
         !gameFinished) {
-      calcularErrores(input.trim());
       setGameFinished(true);
     }
   }, [input, inputPantalla]);
 
-
   useEffect(() => {
-    if (startTime && !gameFinished) {
-      const intervalo = setInterval(calculateWPM, 500);
-      return () => clearInterval(intervalo);
+    if (gameFinished && startTime) {
+      const errorCount = calcularErrores(input.trim());
+      const wpmCalculated = calculateWPM(errorCount);
+      enviarResultado(wpmCalculated, errorCount);
     }
-    if (gameFinished) {
-      calculateWPM();
-    }
-  }, [startTime, gameFinished]);
+  }, [gameFinished, startTime]);
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -96,16 +120,19 @@ export default function TypingGame() {
       }
     }
     setErrors(errorCount);
+    return errorCount;
   };
 
-  const calculateWPM = () => {
-    if (startTime) {
-      const elapsedMinutes = (Date.now() - startTime) / 60000;
-      const wordsTyped = (input.trim().split(" ").length) || 1;
-      const wpmCalculated = Math.round((wordsTyped - errors) / elapsedMinutes);
-      setWpm(wpmCalculated > 0 ? wpmCalculated : 0);
-    }
-  };
+  const calculateWPM = (errores) => {
+  if (startTime) {
+    const elapsedMinutes = (Date.now() - startTime) / 60000;
+    const wordsTyped = (input.trim().split(" ").length) || 1;
+    const wpmCalculated = Math.round((wordsTyped - errores) / elapsedMinutes);
+    setWpm(wpmCalculated > 0 ? wpmCalculated : 0);
+    return wpmCalculated > 0 ? wpmCalculated : 0;
+  }
+  return 0;
+};
 
   const getHighlightedText = () => {
     const allInput = (input + inputPantalla).trim().split(" ");
@@ -250,5 +277,6 @@ export default function TypingGame() {
         </button>
       </div>
     </main>
-  );
+  ); 
+
 }
