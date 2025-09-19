@@ -6,9 +6,13 @@ const connectDB = require('./config/db');
 const app = express();
 
 
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: 'https://mecanografia-juego.vercel.app/', 
+  methods: ['GET', 'POST'],
+  credentials: true,
+}));
 
 
 app.use('/api/auth', require('./rutas/authRoutes'));
