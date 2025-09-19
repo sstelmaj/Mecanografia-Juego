@@ -14,6 +14,7 @@ Además, incluye funcionalidades de registro, login y persistencia de usuarios y
 - Backend en Node.js + Express con base de datos MongoDB (hosteada en Render).
 - Manejo de errores y feedback visual para los usuarios.
 - Despliegue separado: frontend en Vercel, backend en Render.
+- Todas las rutas protegidas por **tokens JWT** cuando corresponde.
 
 ---
 
@@ -30,6 +31,7 @@ Además, incluye funcionalidades de registro, login y persistencia de usuarios y
 - MongoDB (Mongoose)
 - Bcrypt para hashing de contraseñas
 - CORS configurado para comunicación segura con el frontend
+- JWT (jsonwebtoken) para autenticación de usuarios
 
 **Despliegue:**
 - Frontend: Vercel
