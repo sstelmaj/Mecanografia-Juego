@@ -34,7 +34,7 @@ async function loginUsuario(req, res) {
         if (!usuario || !(await bcrypt.compare(req.body.password, usuario.password))) {
             return res.status(401).send({ message: 'Credenciales inválidas' });
         }
-        const token = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '2h' });
         console.log("Token generado:", token);
         res.send({ 
             message: 'Login exitoso',

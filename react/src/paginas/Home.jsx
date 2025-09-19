@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import palabrasComunes from "../modelo/palabras";
-//import { set } from "mongoose";
-//import { set } from "mongoose";
+import { jwtDecode } from 'jwt-decode';
 
 const misPalabrasComunes = palabrasComunes;
 
@@ -198,6 +197,10 @@ export default function TypingGame() {
     window.location.href = "/Login";
   };
 
+  const handleResultados = () => {
+    window.location.href = "/resultados";
+  };
+
   return (
     <main className="h-full max-h-full">
       <div className="container">
@@ -238,12 +241,19 @@ export default function TypingGame() {
               >
                 Cerrar sesión
               </button>
+              <button 
+                className="text-white px-4 py-2 rounded hover:bg-red-600 transition w-full mb-2"
+                onClick={handleResultados}
+              >
+                Resultados
+              </button>
               <button
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition w-full"
+                className="bg-gray-300 text-white px-4 py-2 rounded hover:bg-gray-400 transition w-full mb-2 mt-10"
                 onClick={() => setShowModal(false)}
               >
                 Cerrar
               </button>
+              
             </div>
           )}
         </div>
