@@ -44,7 +44,7 @@ export default function Resultados() {
         }
 
         try {
-            const response = await fetch("http://localhost:4000/api/auth/results/user", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/results/user`, {
             method: "GET",
             headers: {
                 'Authorization': `Bearer ${token}`,

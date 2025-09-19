@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import palabrasComunes from "../modelo/palabras";
-import { jwtDecode } from 'jwt-decode';
 
 const misPalabrasComunes = palabrasComunes;
 
@@ -33,7 +32,7 @@ export default function TypingGame() {
     const payload = { wpm, errorCount };
     const bodyString = JSON.stringify(payload);
     try {
-      const response = await fetch('http://localhost:4000/api/auth/results', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/results`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
