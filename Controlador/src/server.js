@@ -11,7 +11,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: 'https://mecanografia-juego.vercel.app', 
   methods: ['GET', 'POST'],
-  credentials: true,
 }));
 
 
