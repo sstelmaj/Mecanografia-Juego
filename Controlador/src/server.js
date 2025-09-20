@@ -9,8 +9,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-  origin: 'https://mecanografia-juego.vercel.app', 
-  methods: ['GET', 'POST'],
+    origin: [
+        'https://mecanografia-juego.vercel.app',
+        /^http:\/\/localhost(:\d+)?$/
+    ],
+    methods: ['GET', 'POST'],
 }));
 
 

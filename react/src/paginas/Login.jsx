@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { data, useNavigate, useLocation } from "react-router-dom";
+import Spinner from "../Componentes/Spinner";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -7,6 +8,8 @@ export default function Login() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();  
   const location = useLocation();
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => { 
     if (location.state?.message && !message) {
@@ -26,6 +29,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     setMessage("");
 
     try {
@@ -50,6 +54,8 @@ export default function Login() {
     } catch (err) {
       console.error("Fetch error:", err);
       setMessage("Error de conexión. Verifica la consola para más detalles.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -115,6 +121,7 @@ export default function Login() {
           >
             Ingresar
           </button>
+          <Spinner loading={loading} size={50} color="#3498db" className="flex items-center"/>
         </form>
 
         <div className="flex items-center my-6">
