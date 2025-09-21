@@ -189,6 +189,7 @@ export default function TypingGame() {
   const handleLogout = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("email");
+    localStorage.removeItem("token");
     setIsAuthenticated(false);
     setUsername("");
     setEmail("");
