@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Spinner from "../Componentes/Spinner";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -9,8 +10,12 @@ export default function Register() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setLoading(true);
     setMessage("");
 
     if (password !== confirmPassword) {
@@ -37,6 +42,8 @@ export default function Register() {
     } catch (err) {
       console.error("Fetch error:", err);
       setMessage("Error de conexión. Verifica la consola para más detalles.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,9 +139,11 @@ export default function Register() {
         <button
           type="submit"
           className="w-full bg-[rgba(72,86,82,1)] text-white font-medium py-2 rounded-lg shadow transition hover:bg-[rgba(60,70,66,1)]"
+          disabled={loading}
         >
           Registrarse
         </button>
+        <Spinner loading={loading} size={50} className="flex items-center justify-center"/>
       </form>
 
       <div className="flex items-center my-6">

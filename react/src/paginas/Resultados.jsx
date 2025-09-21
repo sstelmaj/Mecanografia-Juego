@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from 'jwt-decode';
+import Spinner from "../Componentes/Spinner";
 
 export default function Resultados() {
   const [results, setResults] = useState([]);
   const [top5, setTop5] = useState([]);
   const [historial, setHistorial] = useState([]);
 
+  const [loading, setLoading] = useState(false);
 
   const [username, setUsername] = useState(localStorage.getItem("username") || "Usuario no reconocido");
   const navigate = useNavigate();
@@ -43,6 +45,9 @@ export default function Resultados() {
             return;
         }
 
+        if (loading) return;
+        setLoading(true);
+
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/results/user`, {
             method: "GET",
@@ -60,6 +65,8 @@ export default function Resultados() {
         } catch (error) {
             console.error('Fetch error:', error);
             alert('Error al obtener los resultados');
+        } finally {
+            setLoading(false);
         }
     };
     checkTokenAndFetchResults();
@@ -81,51 +88,59 @@ export default function Resultados() {
 
         {/* Tabla para el Top 5 */}
         <h2 className="text-xl font-bold mt-4 mb-2 text-white">Top 5 Mejores Resultados</h2>
-        {top5 && top5.length > 0 ? (
-        <table className="w-full mt-2 text-center text-white">
+        {loading ? (
+            <div className="flex items-center justify-center min-h-[100px]">
+            <Spinner loading={loading} size={50} className="flex items-center justify-center" color="gray-500"/>
+            </div>
+        ) : top5 && top5.length > 0 ? (
+            <table className="w-full mt-2 text-center text-white">
             <thead>
-            <tr className="bg-gray-700">
+                <tr className="bg-gray-700">
                 <th className="p-2">Fecha</th>
                 <th className="p-2">WPM</th>
                 <th className="p-2">Errores</th>
-            </tr>
+                </tr>
             </thead>
             <tbody>
-            {top5.map((result, index) => (
+                {top5.map((result, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-600' : 'bg-gray-500'}>
-                <td className="p-2">{new Date(result.timestamp).toLocaleDateString()}</td>
-                <td className="p-2">{result.wpm}</td>
-                <td className="p-2">{result.errorCount}</td>
+                    <td className="p-2">{new Date(result.timestamp).toLocaleDateString()}</td>
+                    <td className="p-2">{result.wpm}</td>
+                    <td className="p-2">{result.errorCount}</td>
                 </tr>
-            ))}
+                ))}
             </tbody>
-        </table>
+            </table>
         ) : (
-        <p className="mt-2 text-center text-white">Sin top 5 disponible.</p>
+            <p className="mt-2 text-center text-white">Sin top 5 disponible.</p>
         )}
 
         <h2 className="text-xl font-bold mt-4 mb-2 text-white">Últimas 10 Partidas</h2>
-        {historial && historial.length > 0 ? (
-        <table className="w-full mt-2 text-center text-white">
+        {loading ? (
+            <div className="flex items-center justify-center min-h-[100px]">
+            <Spinner loading={loading} size={50} className="flex items-center justify-center" color="gray-500"/>
+            </div>
+        ) : historial && historial.length > 0 ? (
+            <table className="w-full mt-2 text-center text-white">
             <thead>
-            <tr className="bg-gray-700">
+                <tr className="bg-gray-700">
                 <th className="p-2">Fecha</th>
                 <th className="p-2">WPM</th>
                 <th className="p-2">Errores</th>
-            </tr>
+                </tr>
             </thead>
             <tbody>
-            {historial.map((result, index) => (
+                {historial.map((result, index) => (
                 <tr key={index} className={index % 2 === 0 ? 'bg-gray-600' : 'bg-gray-500'}>
-                <td className="p-2">{new Date(result.timestamp).toLocaleDateString()}</td>
-                <td className="p-2">{result.wpm}</td>
-                <td className="p-2">{result.errorCount}</td>
+                    <td className="p-2">{new Date(result.timestamp).toLocaleDateString()}</td>
+                    <td className="p-2">{result.wpm}</td>
+                    <td className="p-2">{result.errorCount}</td>
                 </tr>
-            ))}
+                ))}
             </tbody>
-        </table>
+            </table>
         ) : (
-        <p className="mt-2 text-center text-white">Sin historial disponible.</p>
+            <p className="mt-2 text-center text-white">Sin historial disponible.</p>
         )}
 
         <button

@@ -29,6 +29,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setMessage("");
 
@@ -118,10 +119,11 @@ export default function Login() {
           <button
             type="submit"
             className="w-full text-white font-medium py-2 rounded-lg shadowtransition"
+            disabled={loading}
           >
             Ingresar
           </button>
-          <Spinner loading={loading} size={50} color="#3498db" className="flex items-center"/>
+          <Spinner loading={loading} size={50} className="flex items-center justify-center"/>
         </form>
 
         <div className="flex items-center my-6">
