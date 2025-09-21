@@ -132,7 +132,7 @@ export default function Login() {
           <hr className="flex-grow border-gray-300" />
         </div>
 
-        <button
+        {/* <button
           type="button"
           className="w-full flex items-center justify-center gap-2 bg-[rgba(72,86,82,255)] text-white font-medium py-2 rounded-lg shadow transition"
         >
@@ -142,8 +142,9 @@ export default function Login() {
             <path d="M6.36 13.91c-.2-.59-.31-1.21-.31-1.91s.11-1.32.31-1.91V7.48H3.88A9.946 9.946 0 002 12c0 1.59.38 3.09 1.06 4.42l3.3-2.51z" />
             <path d="M12 6.5c1.41 0 2.67.48 3.66 1.43l2.73-2.73C16.97 3.89 14.7 3 12 3 8.52 3 5.54 5.25 3.88 8.09l3.3 2.51c.79-2.38 3.01-4.15 5.64-4.15z" />
           </svg>
-          Iniciar con Google
-        </button>
+          Iniciar con Google 
+        </button> */}
+
         <a
           href="/register"
           className="text-gray-700 flex items-center justify-center text-sm mt-2 hover:text-black underline"
